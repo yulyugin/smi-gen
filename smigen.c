@@ -19,7 +19,7 @@
 #include <windows.h>
 #include <winioctl.h>
 
-#include "smigen.h"
+#include "smigen-ioctl.h"
 
 static void
 smigen_perror(const char *s)

@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "smigen.h"
+#include "smigen-ioctl.h"
 
 #define NT_DEVICE_NAME  L"\\Device\\SMIGEN"
 #define DOS_DEVICE_NAME L"\\DosDevices\\SmiGen"
@@ -152,10 +153,7 @@ SmiGenDeviceControl(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
         }
 
         smigen_printk("SMIGEN_START: %d\n", (int)*buffer);
-
-        if (!smigen_safe_rdmsr(MSR_SMI_COUNT, &smi_count)) {
-            smigen_printk("smi_count: %#llx\n", smi_count);
-        }
+        smigen_trigger_smi();
 
         MmUnlockPages(mdl);
         IoFreeMdl(mdl);
@@ -185,10 +183,10 @@ smigen_printk(const char *fmt, ...)
     return 0;
 }
 
-extern uint64 __rdmsr(int num);
+extern uint64 __rdmsr(unsigned num);
 
 int
-smigen_safe_rdmsr(int msr, uint64 *val)
+smigen_safe_rdmsr(unsigned msr, uint64 *val)
 {
     try {
         *val = __rdmsr(msr);
@@ -197,4 +195,10 @@ smigen_safe_rdmsr(int msr, uint64 *val)
     }
 
     return 0;
+}
+
+void
+smigen_port_out(unsigned port, uint64 data)
+{
+    __outdword((USHORT)port, (ULONG)data);
 }

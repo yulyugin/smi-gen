@@ -19,7 +19,7 @@ public __rdmsr
 
 .code
 
-; uint64 __rdmsr(int num)
+; uint64 __rdmsr(unsigned num)
 __rdmsr:
     rdmsr               ; RCX is already loaded with correct value
     shl rdx, 32

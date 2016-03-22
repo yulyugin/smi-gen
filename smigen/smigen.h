@@ -18,15 +18,43 @@
 #ifndef __SIMGEN_H__
 #define __SMIGEN_H__
 
-#define SMIGEN_START    CTL_CODE(FILE_DEVICE_UNKNOWN, 1, METHOD_NEITHER, FILE_WRITE_ACCESS)
-#define SMIGEN_STOP     CTL_CODE(FILE_DEVICE_UNKNOWN, 2, METHOD_NEITHER, 0)
-
 typedef unsigned __int64 uint64;
 
-#define MSR_SMI_COUNT   0x34
+#define MSR_SMI_COUNT       0x34
+
+/* Software SMI triggered by the system software via an I/O access to a location
+ * considered special by the motherboard logic (port 0B2h is common). */
+#define PORT_SMI_TRIGGER    0xB2
 
 int smigen_printk(const char *fmt, ...);
 
-int smigen_safe_rdmsr(int msr, uint64 *val);
+int smigen_safe_rdmsr(unsigned msr, uint64 *val);
+
+void smigen_port_out(unsigned port, uint64 data);
+
+static int
+smigen_trigger_smi(void)
+{
+    uint64 smi_count_before, smi_count_after;
+
+    if (smigen_safe_rdmsr(MSR_SMI_COUNT, &smi_count_before)) {
+        return -1;
+    }
+
+    smigen_port_out(PORT_SMI_TRIGGER, 1);
+
+    if (smigen_safe_rdmsr(MSR_SMI_COUNT, &smi_count_after)) {
+        return -1;
+    }
+
+    if (smi_count_after <= smi_count_before) {
+        smigen_printk("SMI in not triggered. %#llx port is not working",
+                      PORT_SMI_TRIGGER);
+        return -1;
+    }
+
+    smigen_printk("SMI triggered successfully\n");
+    return 0;
+}
 
 #endif /* __SMIGEN_H__ */
