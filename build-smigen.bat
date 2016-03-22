@@ -13,7 +13,8 @@ gcc -Wall -Werror -Ismigen smigen.c -o smigen.exe
 
 goto EXIT
 
-:UNKNOWN_DDK
-ECHO "*** Only Windows Driver Kit Version 7.1.0 is supported. ***"
+:UNKNOWN_WDK
+ECHO *** Can't find useful Windows Driver Kit. ***
+ECHO *** Only Windows Driver Kit Version 7.1.0 is supported. ***
 
 :EXIT

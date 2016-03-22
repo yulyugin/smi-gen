@@ -3,3 +3,4 @@ TARGETTYPE=DRIVER
 TARGETPATH=../build-$(DDK_TARGET_OS)-$(DDKBUILDENV)
 
 SOURCES=module-win.c
+AMD64_SOURCES=cpu-inlines.asm

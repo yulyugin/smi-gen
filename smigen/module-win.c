@@ -100,6 +100,7 @@ SmiGenDeviceControl(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
     PCHAR               inBuf;
     PMDL                mdl = NULL;
     PCHAR               buffer = NULL;
+    uint64              smi_count;
 
     irpSp = IoGetCurrentIrpStackLocation(Irp);
     inBufLength = irpSp->Parameters.DeviceIoControl.InputBufferLength;
@@ -152,6 +153,10 @@ SmiGenDeviceControl(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
 
         smigen_printk("SMIGEN_START: %d\n", (int)*buffer);
 
+        if (!smigen_safe_rdmsr(MSR_SMI_COUNT, &smi_count)) {
+            smigen_printk("smi_count: %#llx\n", smi_count);
+        }
+
         MmUnlockPages(mdl);
         IoFreeMdl(mdl);
         break;
@@ -177,5 +182,19 @@ smigen_printk(const char *fmt, ...)
     vDbgPrintExWithPrefix("[smigen] ", DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL,
                           fmt, va);
     va_end(va);
+    return 0;
+}
+
+extern uint64 __rdmsr(int num);
+
+int
+smigen_safe_rdmsr(int msr, uint64 *val)
+{
+    try {
+        *val = __rdmsr(msr);
+    } except (EXCEPTION_EXECUTE_HANDLER) {
+        return -1;
+    }
+
     return 0;
 }

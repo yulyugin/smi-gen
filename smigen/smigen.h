@@ -21,6 +21,12 @@
 #define SMIGEN_START    CTL_CODE(FILE_DEVICE_UNKNOWN, 1, METHOD_NEITHER, FILE_WRITE_ACCESS)
 #define SMIGEN_STOP     CTL_CODE(FILE_DEVICE_UNKNOWN, 2, METHOD_NEITHER, 0)
 
+typedef unsigned __int64 uint64;
+
+#define MSR_SMI_COUNT   0x34
+
 int smigen_printk(const char *fmt, ...);
+
+int smigen_safe_rdmsr(int msr, uint64 *val);
 
 #endif /* __SMIGEN_H__ */
