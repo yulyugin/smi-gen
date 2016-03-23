@@ -18,7 +18,11 @@
 #ifndef __SIMGEN_H__
 #define __SMIGEN_H__
 
+#ifdef __linux__
+typedef unsigned long long uint64;
+#else
 typedef unsigned __int64 uint64;
+#endif
 
 #define MSR_SMI_COUNT       0x34
 
