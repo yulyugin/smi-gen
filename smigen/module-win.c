@@ -198,7 +198,7 @@ smigen_safe_rdmsr(unsigned msr, uint64 *val)
 }
 
 void
-smigen_port_out(unsigned port, uint64 data)
+smigen_port_out(unsigned port, uint32 data)
 {
     __outdword((USHORT)port, (ULONG)data);
 }

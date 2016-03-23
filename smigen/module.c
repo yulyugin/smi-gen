@@ -19,6 +19,7 @@
 #include <linux/module.h>
 #include <linux/miscdevice.h>
 #include <linux/fs.h>
+#include <asm/msr.h>
 
 #include "smigen.h"
 #include "smigen-ioctl.h"
@@ -91,10 +92,15 @@ smigen_printk(const char *fmt, ...)
 int
 smigen_safe_rdmsr(unsigned msr, uint64 *val)
 {
-    return 0;
+    return rdmsrl_safe(msr, val);
 }
 
-void smigen_port_out(unsigned port, uint64 data)
+void
+smigen_port_out(unsigned port, uint32 data)
 {
+    __asm__ __volatile__(
+        "outl %0, %w1"
+        :: "a"(data), "Nd"(port):
+        );
 }
 

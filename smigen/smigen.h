@@ -20,8 +20,10 @@
 
 #ifdef __linux__
 typedef unsigned long long uint64;
+typedef unsigned int uint32;
 #else
 typedef unsigned __int64 uint64;
+typedef unsigned __int32 uint32;
 #endif
 
 #define MSR_SMI_COUNT       0x34
@@ -34,7 +36,7 @@ int smigen_printk(const char *fmt, ...);
 
 int smigen_safe_rdmsr(unsigned msr, uint64 *val);
 
-void smigen_port_out(unsigned port, uint64 data);
+void smigen_port_out(unsigned port, uint32 data);
 
 static int
 smigen_trigger_smi(void)
