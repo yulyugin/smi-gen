@@ -1,13 +1,16 @@
-KVERSION	= $(shell uname -r)
-KMAKE		= $(MAKE) -C /lib/modules/$(KVERSION)/build
+KVERSION    = $(shell uname -r)
+KMAKE       = $(MAKE) -C /lib/modules/$(KVERSION)/build
 
-MKDIR		= mkdir -p
-LN			= ln -sf
-RM			= rm -rf
+CC          = gcc
+CFLAGS      = -Wall -Werror
+
+MKDIR       = mkdir -p
+LN          = ln -sf
+RM          = rm -rf
 
 DRIVER_DIR=build-smigen-$(KVERSION)
 
-all: smigen-driver
+all: smigen-driver smigen-exe
 
 prepare-driver-dir:
 	$(MKDIR) $(DRIVER_DIR)
@@ -18,8 +21,14 @@ prepare-driver-dir:
 smigen-driver: prepare-driver-dir
 	$(KMAKE) M="$$PWD/$(DRIVER_DIR)"
 
+smigen-exe: smigen.c
+	$(CC) $(CFLAGS) smigen.c -Ismigen -o smigen.exe
+
 clean-driver:
 	$(RM) $(DRIVER_DIR)
+
+clean-exe:
+	$(RM) smigen.exe
 
 clean: clean-driver
 

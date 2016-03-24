@@ -16,14 +16,28 @@
 */
 
 #include <stdio.h>
-#include <windows.h>
-#include <winioctl.h>
 
 #include "smigen-ioctl.h"
+
+#ifdef __linux__
+typedef int file_t;
+
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#else /* !__linux__ */
+typedef HANDLE file_t;
+
+#include <winioctl.h>
+#include <windows.h>
+#endif /* !__linux__ */
 
 static void
 smigen_perror(const char *s)
 {
+#ifdef __linux__
+    perror(s);
+#else /* !__linux__ */
     LPTSTR error_string = NULL;
     DWORD ret;
     ret = FormatMessage(
@@ -34,29 +48,64 @@ smigen_perror(const char *s)
 
     printf("%s: %s", s, error_string);
     LocalFree((HLOCAL)error_string);
+#endif /* !__linux__ */
+}
+
+static int
+smigen_open(file_t *fd)
+{
+#ifdef __linux__
+    if ((*fd = open("/dev/smigen", O_RDWR)) < 0) {
+#else /* !__linux__ */
+    if ((*fd = CreateFile("\\\\.\\SmiGen", GENERIC_READ | GENERIC_WRITE, 0,
+                    NULL, OPEN_EXISTING, 0, NULL)) == INVALID_HANDLE_VALUE) {
+#endif
+        return -1;
+    }
+    return 0;
+}
+
+static void
+smigen_close(file_t fd)
+{
+#ifdef __linux__
+    close(fd);
+#else /* !__linux__ */
+    CloseHandle(fd);
+#endif /* !__linux__ */
+}
+
+static int
+smigen_ioctl(file_t fd, int request, int data)
+{
+#ifdef __linux__
+    return ioctl(fd, request, data);
+#else /* !__linux__ */
+    if (!DeviceIoControl(fd, (DWORD) request, data, sizeof(period),
+                         NULL, 0, NULL, NULL))
+        return -1;
+#endif /* !__linux__ */
 }
 
 int
 main(int argc, char **argv)
 {
-    DWORD period = 10;
-    HANDLE fd;
-    if ((fd = CreateFile("\\\\.\\SmiGen", GENERIC_READ | GENERIC_WRITE, 0, NULL,
-                         OPEN_EXISTING, 0, NULL)) == INVALID_HANDLE_VALUE) {
+    file_t fd;
+    if (smigen_open(&fd) < 0) {
         smigen_perror("open");
         return 0;
     }
 
-    if (!DeviceIoControl(fd, (DWORD) SMIGEN_START, &period, sizeof(period),
-                         NULL, 0, NULL, NULL)) {
-            smigen_perror("ioctl");
+    if (smigen_ioctl(fd, SMIGEN_START, 10)) {
+        smigen_perror("ioctl");
+        smigen_close(fd);
+        return 0;
     }
 
-    if (!DeviceIoControl(fd, (DWORD) SMIGEN_STOP, &period, sizeof(period),
-                         NULL, 0, NULL, NULL)) {
-            smigen_perror("ioctl");
+    if (smigen_ioctl(fd, SMIGEN_STOP, 0)) {
+        smigen_perror("ioctl");
     }
 
-    CloseHandle(fd);
+    smigen_close(fd);
     return 0;
 }
