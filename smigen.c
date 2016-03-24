@@ -26,10 +26,10 @@ typedef int file_t;
 #include <unistd.h>
 #include <sys/ioctl.h>
 #else /* !__linux__ */
-typedef HANDLE file_t;
-
-#include <winioctl.h>
 #include <windows.h>
+#include <winioctl.h>
+
+typedef HANDLE file_t;
 #endif /* !__linux__ */
 
 static void
@@ -81,9 +81,10 @@ smigen_ioctl(file_t fd, int request, int data)
 #ifdef __linux__
     return ioctl(fd, request, data);
 #else /* !__linux__ */
-    if (!DeviceIoControl(fd, (DWORD) request, data, sizeof(period),
+    if (!DeviceIoControl(fd, (DWORD) request, &data, sizeof(data),
                          NULL, 0, NULL, NULL))
         return -1;
+    return 0;
 #endif /* !__linux__ */
 }
 
