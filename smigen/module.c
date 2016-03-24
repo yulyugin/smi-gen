@@ -44,6 +44,19 @@ static int
 smigen_ioctl(struct inode *inode, struct file *file, unsigned int cmd,
              unsigned long param)
 {
+    switch(cmd) {
+    case SMIGEN_STOP:
+        smigen_printk("SMIGEN_STOP: not yet implemented\n");
+        break;
+
+    case SMIGEN_START:
+        smigen_printk("SMIGEN_START: not yet implemented\n");
+        break;
+
+    default:
+        smigen_printk("Unrecognised ioctl request %#llx\n", cmd);
+        return -EINVAL;
+    }
     return 0;
 }
 
