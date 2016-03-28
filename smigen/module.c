@@ -24,7 +24,7 @@
 #include "smigen.h"
 #include "smigen-ioctl.h"
 
-MODULE_LICENSE("GPL v3");
+MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Evgeny Yulyugin <yulyugin@gmail.com>");
 MODULE_DESCRIPTION("smigen");
 
@@ -40,9 +40,8 @@ smigen_release(struct inode *inode, struct file *file)
     return 0;
 }
 
-static int
-smigen_ioctl(struct inode *inode, struct file *file, unsigned int cmd,
-             unsigned long param)
+static long
+smigen_generic_ioctl(struct file *file, unsigned int cmd, unsigned long param)
 {
     switch(cmd) {
     case SMIGEN_STOP:
@@ -61,11 +60,41 @@ smigen_ioctl(struct inode *inode, struct file *file, unsigned int cmd,
     return 0;
 }
 
+#ifdef HAVE_UNLOCKED_IOCTL
+static long
+smigen_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned long param)
+{
+    return smigen_generic_ioctl(file, cmd, param);
+}
+#else /* not HAVE_INLOCKED_IOCTL */
+static int
+smigen_ioctl(struct inode *inode, struct file *file, unsigned int cmd,
+             unsigned long param)
+{
+    return smigen_generic_ioctl(file, cmd, param);
+}
+#endif /* not HAVE_UNLOCKED_IOCTL */
+
+#ifdef HAVE_COMPAT_IOCTL
+static long
+smigen_compat_ioctl(struct file *file, unsigned int cmd, unsigned long param)
+{
+    return smigen_generic_ioctl(file, cmd, param);
+}
+#endif /* HAVE_COMPAT_IOCTL */
+
 static const struct file_operations smigen_fops = {
     .owner = THIS_MODULE,
     .open = smigen_open,
     .release = smigen_release,
+#ifdef HAVE_UNLOCKED_IOCTL
+    .unlocked_ioctl = smigen_unlocked_ioctl,
+#else
     .ioctl = smigen_ioctl,
+#endif
+#ifdef HAVE_COMPAT_IOCTL
+    .compat_ioctl = smigen_compat_ioctl,
+#endif
 };
 
 static struct miscdevice smigen_dev = {

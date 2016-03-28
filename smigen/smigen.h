@@ -26,7 +26,9 @@ typedef unsigned __int64 uint64;
 typedef unsigned __int32 uint32;
 #endif
 
+#ifndef MSR_SMI_COUNT
 #define MSR_SMI_COUNT       0x34
+#endif /* ndef MSR_SMI_COUNT */
 
 /* Software SMI triggered by the system software via an I/O access to a location
  * considered special by the motherboard logic (port 0B2h is common). */
