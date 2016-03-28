@@ -30,5 +30,5 @@ clean-driver:
 clean-exe:
 	$(RM) smigen.exe
 
-clean: clean-driver
+clean: clean-driver clean-exe
 
