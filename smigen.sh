@@ -11,12 +11,12 @@ if [ ! -z `id -u` ] ; then
    SUDO="sudo"
 fi
 
-$SUDO /sbin/rmmod smigen
+/sbin/lsmod |grep smigen &> /dev/null && $SUDO /sbin/rmmod smigen
 $SUDO /sbin/insmod $SMIGEN_DRIVER_KO
 
 RET=$?
 if [ $RET -ne 0 ] ; then
-    echo "Failed to load $SMIGEN_DRIVER_KO"
+    echo "Failed to load `basename $SMIGEN_DRIVER_KO`"
     exit $RET
 fi
 

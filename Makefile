@@ -8,27 +8,33 @@ MKDIR       = mkdir -p
 LN          = ln -sf
 RM          = rm -rf
 
+ifeq ($(VERBOSE), yes)
+QUIET=
+else
+QUIET=@
+endif
+
 DRIVER_DIR=build-smigen-$(KVERSION)
 
 all: smigen-driver smigen-exe
 
 prepare-driver-dir:
-	$(MKDIR) $(DRIVER_DIR)
-	$(LN) ../smigen/module.c $(DRIVER_DIR)
-	$(LN) ../smigen/GNUMakefile $(DRIVER_DIR)/Makefile
-	for x in smigen/*.h ; do $(LN) ../$$x $(DRIVER_DIR) ; done
+	$(QUIET)$(MKDIR) $(DRIVER_DIR)
+	$(QUIET)$(LN) ../smigen/module.c $(DRIVER_DIR)
+	$(QUIET)$(LN) ../smigen/GNUMakefile $(DRIVER_DIR)/Makefile
+	$(QUIET)for x in smigen/*.h ; do $(LN) ../$$x $(DRIVER_DIR) ; done
 
 smigen-driver: prepare-driver-dir
-	$(KMAKE) M="$$PWD/$(DRIVER_DIR)"
+	$(QUIET)$(KMAKE) M="$$PWD/$(DRIVER_DIR)"
 
 smigen-exe: smigen.c
-	$(CC) $(CFLAGS) smigen.c -Ismigen -o smigen.exe
+	$(QUIET)$(CC) $(CFLAGS) smigen.c -Ismigen -o smigen.exe
 
 clean-driver:
-	$(RM) $(DRIVER_DIR)
+	$(QUIET)$(RM) $(DRIVER_DIR)
 
 clean-exe:
-	$(RM) smigen.exe
+	$(QUIET)$(RM) smigen.exe
 
 clean: clean-driver clean-exe
 
