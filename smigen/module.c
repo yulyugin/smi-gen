@@ -50,7 +50,8 @@ smigen_ioctl(struct inode *inode, struct file *file, unsigned int cmd,
         break;
 
     case SMIGEN_START:
-        smigen_printk("SMIGEN_START: not yet implemented\n");
+        smigen_printk("SMIGEN_START: %d\n", param);\
+        smigen_trigger_smi();
         break;
 
     default:
