@@ -44,19 +44,24 @@ static int
 smigen_trigger_smi(void)
 {
     uint64 smi_count_before, smi_count_after;
+    int has_msr_smi_count = 1;
 
+    /* Some processor like Penryn doesn't support MSR_SMI_COUNT (0x34).
+     * Try to generate SMI even if this MSR is not supported. */
     if (smigen_safe_rdmsr(MSR_SMI_COUNT, &smi_count_before)) {
-        return -1;
+        smigen_printk("Processor doesn't support MSR_SMI_COUNT (0x34). Cannot"
+                      " verify is SMI is actually generated.\n");
+        has_msr_smi_count = 0;
     }
 
     smigen_port_out(PORT_SMI_TRIGGER, 1);
 
-    if (smigen_safe_rdmsr(MSR_SMI_COUNT, &smi_count_after)) {
+    if (has_msr_smi_count && smigen_safe_rdmsr(MSR_SMI_COUNT, &smi_count_after)) {
         return -1;
     }
 
-    if (smi_count_after <= smi_count_before) {
-        smigen_printk("SMI in not triggered. %#llx port is not working",
+    if (has_msr_smi_count && (smi_count_after <= smi_count_before)) {
+        smigen_printk("SMI in not triggered. %#llx port is not working.\n",
                       PORT_SMI_TRIGGER);
         return -1;
     }
