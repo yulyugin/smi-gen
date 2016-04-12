@@ -76,14 +76,13 @@ smigen_close(file_t fd)
 }
 
 static int
-smigen_ioctl(file_t fd, int request, int data)
+smigen_ioctl(file_t fd)
 {
 #ifdef __linux__
-    return ioctl(fd, request, data);
+    return ioctl(fd, SMIGEN_TRIGGER_SMI);
 #else /* !__linux__ */
     DWORD bytes;
-    if (!DeviceIoControl(fd, (DWORD) request, &data, sizeof(data),
-                         NULL, 0, &bytes, NULL))
+    if (!DeviceIoControl(fd, SMIGEN_TRIGGER_SMI, NULL, 0, NULL, 0, &bytes, NULL))
         return -1;
     return 0;
 #endif /* !__linux__ */
@@ -98,14 +97,10 @@ main(int argc, char **argv)
         return 0;
     }
 
-    if (smigen_ioctl(fd, SMIGEN_START, 10)) {
+    if (smigen_ioctl(fd)) {
         smigen_perror("ioctl");
         smigen_close(fd);
         return 0;
-    }
-
-    if (smigen_ioctl(fd, SMIGEN_STOP, 0)) {
-        smigen_perror("ioctl");
     }
 
     smigen_close(fd);

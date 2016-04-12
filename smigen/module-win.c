@@ -97,66 +97,13 @@ NTSTATUS
 SmiGenDeviceControl(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
     PIO_STACK_LOCATION  irpSp;
     NTSTATUS            ntStatus = STATUS_SUCCESS;
-    ULONG               inBufLength;
-    PCHAR               inBuf;
-    PMDL                mdl = NULL;
-    PCHAR               buffer = NULL;
-    uint64              smi_count;
 
     irpSp = IoGetCurrentIrpStackLocation(Irp);
-    inBufLength = irpSp->Parameters.DeviceIoControl.InputBufferLength;
-
-    if (!inBufLength) {
-        ntStatus = STATUS_INVALID_PARAMETER;
-        goto end;
-    }
 
     switch (irpSp->Parameters.DeviceIoControl.IoControlCode) {
-    case SMIGEN_STOP:
-        smigen_printk("SMIGEN_STOP: not yet implemented\n");
-        break;
-
-    case SMIGEN_START:
-        inBuf = irpSp->Parameters.DeviceIoControl.Type3InputBuffer;
-
-        try {
-            ProbeForRead(inBuf, inBufLength, sizeof(UCHAR));
-        } except(EXCEPTION_EXECUTE_HANDLER) {
-            ntStatus = GetExceptionCode();
-            smigen_printk("Exception while accessing input buffer 0X%08X in"
-                          " SMIGEN_START\n", ntStatus);
-            break;
-        }
-
-        mdl = IoAllocateMdl(inBuf, inBufLength,  FALSE, TRUE, NULL);
-        if (!mdl) {
-            ntStatus = STATUS_INSUFFICIENT_RESOURCES;
-            break;
-        }
-
-        try {
-            MmProbeAndLockPages(mdl, UserMode, IoReadAccess);
-        } except(EXCEPTION_EXECUTE_HANDLER) {
-            ntStatus = GetExceptionCode();
-            smigen_printk("Exception while locking input buffer 0X%08X in"
-                          " SMIGEN_START\n", ntStatus);
-            IoFreeMdl(mdl);
-            break;
-        }
-
-        buffer = MmGetSystemAddressForMdlSafe(mdl, NormalPagePriority );
-        if (!buffer) {
-                ntStatus = STATUS_INSUFFICIENT_RESOURCES;
-                MmUnlockPages(mdl);
-                IoFreeMdl(mdl);
-                break;
-        }
-
-        smigen_printk("SMIGEN_START: %d\n", (int)*buffer);
-        smigen_trigger_smi();
-
-        MmUnlockPages(mdl);
-        IoFreeMdl(mdl);
+    case SMIGEN_TRIGGER_SMI:
+        if (smigen_trigger_smi() < 0)
+            smigen_printk("Cannot trigger SMI.");
         break;
 
     default:
@@ -166,7 +113,6 @@ SmiGenDeviceControl(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
         break;
     }
 
-end:
     Irp->IoStatus.Status = ntStatus;
     IoCompleteRequest(Irp, IO_NO_INCREMENT);
     return ntStatus;

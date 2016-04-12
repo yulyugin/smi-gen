@@ -19,11 +19,9 @@
 #define __SMIGEN_IOCTL_H__
 
 #ifdef __linux__
-#define SMIGEN_START    _IOR('X', 1, int)
-#define SMIGEN_STOP     _IO('X', 2)
+#define SMIGEN_TRIGGER_SMI  _IO('X', 1)
 #else /* !__linux__ */
-#define SMIGEN_START    CTL_CODE(FILE_DEVICE_UNKNOWN, 1, METHOD_NEITHER, FILE_WRITE_ACCESS)
-#define SMIGEN_STOP     CTL_CODE(FILE_DEVICE_UNKNOWN, 2, METHOD_NEITHER, 0)
+#define SMIGEN_TRIGGER_SMI  CTL_CODE(FILE_DEVICE_UNKNOWN, 1, METHOD_NEITHER, 0)
 #endif /* !__linux__ */
 
 #endif /* __SMIGEN_IOCTL_H__ */

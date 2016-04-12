@@ -44,11 +44,7 @@ static long
 smigen_generic_ioctl(struct file *file, unsigned int cmd, unsigned long param)
 {
     switch(cmd) {
-    case SMIGEN_STOP:
-        smigen_printk("SMIGEN_STOP: not yet implemented\n");
-        break;
-
-    case SMIGEN_START:
+    case SMIGEN_TRIGGER_SMI:
         smigen_printk("SMIGEN_START: %d\n", param);\
         smigen_trigger_smi();
         break;
