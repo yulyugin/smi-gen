@@ -81,8 +81,9 @@ smigen_ioctl(file_t fd, int request, int data)
 #ifdef __linux__
     return ioctl(fd, request, data);
 #else /* !__linux__ */
+    DWORD bytes;
     if (!DeviceIoControl(fd, (DWORD) request, &data, sizeof(data),
-                         NULL, 0, NULL, NULL))
+                         NULL, 0, &bytes, NULL))
         return -1;
     return 0;
 #endif /* !__linux__ */

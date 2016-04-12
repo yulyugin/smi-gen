@@ -31,10 +31,13 @@ smigen-exe: smigen.c
 	$(QUIET)$(CC) $(CFLAGS) smigen.c -Ismigen -o smigen.exe
 
 clean-driver:
-	$(QUIET)$(RM) $(DRIVER_DIR)
+	$(QUIET)$(RM) "$(DRIVER_DIR)"
 
 clean-exe:
 	$(QUIET)$(RM) smigen.exe
 
-clean: clean-driver clean-exe
+clean-windows:
+	$(QUIET)$(RM) build-win7-fre smigen/buildfre_win7_* smigen/objfre_win7_*
+
+clean: clean-driver clean-exe clean-windows
 
