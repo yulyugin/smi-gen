@@ -97,11 +97,8 @@ main(int argc, char **argv)
         return 0;
     }
 
-    if (smigen_ioctl(fd)) {
+    if (smigen_ioctl(fd))
         smigen_perror("ioctl");
-        smigen_close(fd);
-        return 0;
-    }
 
     smigen_close(fd);
     return 0;
