@@ -1,1 +1,1 @@
-Tools to generate SMI interrupt.
+Tool to broadcast system management mode interrupts (SMI).
