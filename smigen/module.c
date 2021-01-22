@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Evgeny Yulyugin
+ * Copyright (c) 2016 Evgenii Iuliugin
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 #include "smigen-ioctl.h"
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Evgeny Yulyugin <yulyugin@gmail.com>");
+MODULE_AUTHOR("Evgenii Iuliugin <yulyugin@gmail.com>");
 MODULE_DESCRIPTION("smigen");
 
 static int
